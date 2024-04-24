@@ -12,7 +12,7 @@ torch.manual_seed(1337)
 batch_size = 32 #Number of training sequences to run in parallel
 block_size = 8 #Max length of the sequence
 learning_rate = 1e-3
-max_iter = 600
+max_iter = 10000
 eval_interval = 300 # How often to evaluate the model
 device = "cuda" if torch.cuda.is_available() else "cpu"
 eval_iters = 200 #For evaluation, take average over multiple iterations
@@ -117,8 +117,11 @@ class BigramLanguageModel(nn.Module):
         # idx is (B,T) array of indices in the current context
         for _ in range(max_new_tokens):
 
+            #crop the idx to the last block_size tokens
+            idx_cond = idx[ :, -block_size: ]
+
             #Get the predictions
-            logits, loss = self(idx)
+            logits, loss = self(idx_cond)
 
             # Outputs (B, T, C) Pluck the last entry in the T dimension for the next prediction
             logits = logits[:,-1, :] #(B, C)
